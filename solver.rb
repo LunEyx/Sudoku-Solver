@@ -13,6 +13,7 @@ class Solver
     end
     initialize_rows
     initialize_cols
+    initialize_boxes
   end
 
   def display
@@ -25,7 +26,11 @@ class Solver
       display_row_middle(row, y)
       display_row_bottom(row)
       print '  +'
-      puts '---+' * 9
+      if y % 3 == 2
+        puts '===+' * 9
+      else
+        puts '---+' * 9
+      end
     end
   end
 
@@ -43,6 +48,7 @@ class Solver
 
       cell.possible -= @rows[cell.y].map(&:value)
       cell.possible -= @cols[cell.x].map(&:value)
+      cell.possible -= @boxes[box_num(cell.x, cell.y)].map(&:value)
 
       changes += 1 if cell.possible != original_possible
     end
@@ -70,6 +76,18 @@ class Solver
     end
   end
 
+  def box_num(x, y)
+    return x / 3 + y / 3 * 3
+  end
+
+  def initialize_boxes
+    @boxes = Array.new(9) { [] }
+
+    @board.each do |cell|
+      @boxes[box_num(cell.x, cell.y)].push(cell)
+    end
+  end
+
   def display_row_top(row)
     print '  |'
     row.each do |cell|
@@ -78,7 +96,11 @@ class Solver
       else
         print cell.display_possible([1, 2, 3]).join
       end
-      print '|'
+      if cell.x % 3 == 2
+        print '$'
+      else
+        print '|'
+      end
       print "\n" if cell.x == 8
     end
   end
@@ -91,7 +113,11 @@ class Solver
       else
         print cell.display_possible([4, 5, 6]).join
       end
-      print '|'
+      if cell.x % 3 == 2
+        print '$'
+      else
+        print '|'
+      end
       print "\n" if cell.x == 8
     end
   end
@@ -104,7 +130,11 @@ class Solver
       else
         print cell.display_possible([7, 8, 9]).join
       end
-      print '|'
+      if cell.x % 3 == 2
+        print '$'
+      else
+        print '|'
+      end
       print "\n" if cell.x == 8
     end
   end
