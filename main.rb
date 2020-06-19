@@ -6,11 +6,35 @@ def greeting
   puts "Welcome to Sudoku Solver\n"
 end
 
-def start_solver
+def prepare_solver
   file = open('sample.txt', 'r')
   board = file.read.split
-  solver = Solver.new(board)
+  return Solver.new(board)
+end
+
+def start_solver(solver)
   solver.display
+
+  option = ''
+  until solver.solve?
+    puts 'Please select an option:'
+    puts '1. Simple row and column elimination'
+    puts '2. Exit'
+    print '> '
+    option = gets.chomp
+    next if option.empty?
+
+    case option
+    when '1'
+      changes = solver.simple_elimination
+      solver.display
+      puts "Done! #{changes} cells are modified"
+    when '2'
+      exit
+    else
+      puts "Sorry, I don't understand: '#{option}'\n\n"
+    end
+  end
 end
 
 def start_prompt
@@ -20,15 +44,19 @@ def start_prompt
     puts 'Please select an option:'
     puts '1. Solve'
     puts '2. Exit'
+    print '> '
     option = gets.chomp
+    next if option.empty?
+
     case option
     when '1'
-      start_solver
+      solver = prepare_solver
+      start_solver(solver)
     when '2'
       puts 'Bye Bye...'
       exit
     else
-      puts "Unknown option: '#{option}'\n\n"
+      puts "Sorry, I don't understand: '#{option}'\n\n"
       option = ''
     end
   end

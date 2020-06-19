@@ -15,6 +15,9 @@ Layout/DotPosition:
 Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
 
+Layout/EndOfLine:
+  EnforcedStyle: lf
+
 Lint/AssignmentInCondition:
   AllowSafeAssignment: false
 
