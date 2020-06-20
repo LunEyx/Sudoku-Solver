@@ -16,15 +16,15 @@ class Solver
     initialize_boxes
   end
 
-  def display
+  def display(display_possible = true)
     print '   '
     9.times { |i| print " #{(65 + i).chr}  " }
     print "\n  +"
     puts '---+' * 9
     @board.each_slice(9).with_index do |row, y|
-      display_row_top(row)
-      display_row_middle(row, y)
-      display_row_bottom(row)
+      display_row_top(row, display_possible)
+      display_row_middle(row, y, display_possible)
+      display_row_bottom(row, display_possible)
       print '  +'
       if y % 3 == 2
         puts '===+' * 9
@@ -36,6 +36,19 @@ class Solver
 
   def solve?
     return @board.all?(&:solve?)
+  end
+
+  def auto_solve
+    methods = %i[simple_elimination single]
+    i = 0
+    while i < methods.length
+      changes = send methods[i]
+      if changes.zero?
+        i += 1
+      else
+        i = 0
+      end
+    end
   end
 
   def simple_elimination
@@ -51,6 +64,20 @@ class Solver
       cell.possible -= @boxes[box_num(cell.x, cell.y)].map(&:value)
 
       changes += 1 if cell.possible != original_possible
+    end
+
+    return changes
+  end
+
+  def single
+    changes = 0
+
+    @board.each do |cell|
+      next if cell.value != 0
+      next if cell.possible.length != 1
+
+      cell.value = cell.possible[0]
+      changes += 1
     end
 
     return changes
@@ -88,10 +115,10 @@ class Solver
     end
   end
 
-  def display_row_top(row)
+  def display_row_top(row, display_possible)
     print '  |'
     row.each do |cell|
-      if cell.solve?
+      if !display_possible || cell.solve?
         print '   '
       else
         print cell.display_possible([1, 2, 3]).join
@@ -105,11 +132,13 @@ class Solver
     end
   end
 
-  def display_row_middle(row, y)
+  def display_row_middle(row, y, display_possible)
     print "#{y} |"
     row.each do |cell|
       if cell.solve?
         print " #{cell.value} "
+      elsif !display_possible
+        print '   '
       else
         print cell.display_possible([4, 5, 6]).join
       end
@@ -122,10 +151,10 @@ class Solver
     end
   end
 
-  def display_row_bottom(row)
+  def display_row_bottom(row, display_possible)
     print '  |'
     row.each do |cell|
-      if cell.solve?
+      if !display_possible || cell.solve?
         print '   '
       else
         print cell.display_possible([7, 8, 9]).join
