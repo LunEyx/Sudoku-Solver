@@ -12,6 +12,7 @@ def start_solver(solver)
     puts '0. Auto Solve'
     puts '1. Simple Elimination'
     puts '2. Single'
+    puts '3. Claiming'
     puts '9. Exit'
     print '> '
     option = gets.chomp
@@ -25,6 +26,7 @@ def start_solver(solver)
   end
 end
 
+# rubocop:disable Metrics/MethodLength
 def solver_action(solver, option)
   case option
   when '0'
@@ -40,6 +42,8 @@ def solver_action(solver, option)
     return solver.simple_elimination
   when '2'
     return solver.single
+  when '3'
+    return solver.claiming
   when '9'
     exit
   else
@@ -47,6 +51,7 @@ def solver_action(solver, option)
     return -1
   end
 end
+# rubocop:enable Metrics/MethodLength
 
 def create_solver(board)
   solver = Solver.new(board)

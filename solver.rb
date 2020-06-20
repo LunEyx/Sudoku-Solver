@@ -61,7 +61,7 @@ class Solver
 
       cell.possible -= @rows[cell.y].map(&:value)
       cell.possible -= @cols[cell.x].map(&:value)
-      cell.possible -= @boxes[box_num(cell.x, cell.y)].map(&:value)
+      cell.possible -= @boxes[box_num(cell)].map(&:value)
 
       changes += 1 if cell.possible != original_possible
     end
@@ -78,6 +78,46 @@ class Solver
 
       cell.value = cell.possible[0]
       changes += 1
+    end
+
+    return changes
+  end
+
+  def claiming_box(arr, n)
+    targets = arr.select { |cell| !cell.solve? && cell.possible.include?(n) }
+    return -1 if targets.empty?
+
+    box_index = box_num(targets[0])
+
+    return targets.all? { |cell| box_num(cell) == box_index } ? box_index : -1
+  end
+
+  def claiming_with(direction, arr, i)
+    changes = 0
+
+    (1..9).each do |n|
+      box_index = claiming_box(arr, n)
+      next if box_index == -1
+
+      box = @boxes[box_index]
+      box.each do |cell|
+        next if cell.solve? || cell.send(direction) == i
+
+        changes += 1 unless cell.possible.delete(n).nil?
+      end
+    end
+
+    return changes
+  end
+
+  def claiming
+    changes = 0
+
+    @rows.each_with_index do |row, y|
+      changes += claiming_with(:y, row, y)
+    end
+    @cols.each_with_index do |col, x|
+      changes += claiming_with(:x, col, x)
     end
 
     return changes
@@ -103,15 +143,15 @@ class Solver
     end
   end
 
-  def box_num(x, y)
-    return x / 3 + y / 3 * 3
+  def box_num(cell)
+    return cell.x / 3 + cell.y / 3 * 3
   end
 
   def initialize_boxes
     @boxes = Array.new(9) { [] }
 
     @board.each do |cell|
-      @boxes[box_num(cell.x, cell.y)].push(cell)
+      @boxes[box_num(cell)].push(cell)
     end
   end
 
